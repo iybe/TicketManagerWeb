@@ -25,6 +25,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import CopyAllIcon from "@mui/icons-material/CopyAll";
 
 const HelloWorld = () => {
   //state variables
@@ -84,9 +85,14 @@ const HelloWorld = () => {
 
     const { status } = await loadCreateTicket(walletAddress, valores);
     setStatus(status);
-  }
+  };
 
   const [groupTickets, setGroupTickets] = useState([]);
+
+  // Copy text to clipboard
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+  };
 
   //called only once
   useEffect(() => {
@@ -156,25 +162,21 @@ const HelloWorld = () => {
       </Button>
 
       <div className="cards">
-        <Card
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr 64px",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <CardHeader sx={{ padding: "0px" }} title="Criar Ingresso" />
-          <CardActions disableSpacing>
-            <ExpandMore
-              expand={expanded}
-              onClick={handleExpandClick}
-              aria-expanded={expanded}
-              aria-label="show more"
-            >
-              <ExpandMoreIcon />
-            </ExpandMore>
-          </CardActions>
+        <Card>
+          <div className="cardHeader">
+            <CardHeader sx={{ padding: "0px" }} title="Criar Ingresso" />
+            <CardActions disableSpacing>
+              <ExpandMore
+                expand={expanded}
+                onClick={handleExpandClick}
+                aria-expanded={expanded}
+                aria-label="show more"
+              >
+                <ExpandMoreIcon />
+              </ExpandMore>
+            </CardActions>
+          </div>
+
           <Collapse in={expanded} timeout="auto" unmountOnExit>
             <CardContent>
               <form className="containerForm">
@@ -230,29 +232,29 @@ const HelloWorld = () => {
           </Collapse>
         </Card>
 
-        <Card
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr 64px",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <CardHeader sx={{ padding: "0px" }} title="Ingressos" />
-          <CardActions disableSpacing>
-            <ExpandMore
-              expand={expanded2}
-              onClick={handleExpandClick2}
-              aria-expanded={expanded2}
-              aria-label="show more"
-            >
-              <ExpandMoreIcon />
-            </ExpandMore>
-          </CardActions>
-          <Collapse in={expanded2} timeout="auto" unmountOnExit>
+        <Card>
+          <div className="cardHeader">
+            <CardHeader sx={{ padding: "0px" }} title="Ingressos" />
+            <CardActions disableSpacing>
+              <ExpandMore
+                expand={expanded2}
+                onClick={handleExpandClick2}
+                aria-expanded={expanded2}
+                aria-label="show more"
+              >
+                <ExpandMoreIcon />
+              </ExpandMore>
+            </CardActions>
+          </div>
+          <Collapse
+            in={expanded2}
+            timeout="auto"
+            unmountOnExit
+            className="collapse"
+          >
             <CardContent>
-              <TableContainer component={Paper} sx={{ overflow: 'scroll', }}>
-                <Table sx={{ minWidth: 650, overflow: 'scroll', }} aria-label="simple table">
+              <TableContainer component={Paper}>
+                <Table aria-label="simple table">
                   <TableHead>
                     <TableRow>
                       <TableCell align="center">Nome do evento</TableCell>
@@ -270,7 +272,22 @@ const HelloWorld = () => {
                         }}
                       >
                         <TableCell align="center">{row.eventName}</TableCell>
-                        <TableCell align="center">{row.organizer}</TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <div className="ellipsis">{row.organizer}</div>
+                          <Button
+                            variant="text"
+                            onClick={copyToClipboard(row.organizer)}
+                          >
+                            <CopyAllIcon />
+                          </Button>
+                        </TableCell>
                         <TableCell align="center">{row.value}</TableCell>
                         <TableCell align="center">{row.quantity}</TableCell>
                       </TableRow>
@@ -297,6 +314,13 @@ const HelloWorld = () => {
           gap: 20px;
         }
 
+        .cardHeader {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px;
+        }
+
         .container-form {
           display: flex;
           justify-content: center;
@@ -307,6 +331,24 @@ const HelloWorld = () => {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 10px;
+        }
+
+        /* Deixar o form com 1fr no celular */
+        @media (max-width: 600px) {
+          .collapse {
+            overflow-x: scroll;
+          }
+
+          .ellipsis {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100px;
+          }
+
+          .form {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </div>
