@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import {
   helloWorldContract,
   connectWallet,
-  updateMessage,
-  loadCurrentMessage,
+  loadCreateTicket,
+  loadGetGroupTickets,
   getCurrentWalletConnected,
 } from "./util/interact.js";
 
@@ -73,26 +73,27 @@ const HelloWorld = () => {
     setValores({ ...valores, [event.target.name]: event.target.value });
   };
 
-  function creatTicket() {
+  const createTicketPressed = async () => {
     const { nomeEvento, valorIngresso, limit, quantidadeIngressos } = valores;
+    console.log("input de createTicketPressed:", valores);
 
-    console.log(valores);
+    if (!nomeEvento || !valorIngresso || !limit || !quantidadeIngressos) {
+      setStatus("❗️ All values must be filled.");
+      return;
+    }
+
+    const { status } = await loadCreateTicket(walletAddress, valores);
+    setStatus(status);
   }
 
-  function createData(nomeEvento = "", valorIngresso = "") {
-    return { nomeEvento, valorIngresso };
-  }
-
-  const rows = [
-    createData("São João 2023", 249.9),
-    createData("São Pedro 2023", 199.9),
-  ];
+  const [groupTickets, setGroupTickets] = useState([]);
 
   //called only once
   useEffect(() => {
     async function fetchMessage() {
-      const message = await loadCurrentMessage();
-      setMessage(message);
+      const vals = await loadGetGroupTickets();
+      console.log("getGroupTickets:", vals);
+      setGroupTickets(vals);
     }
 
     fetchMessage();
@@ -141,12 +142,6 @@ const HelloWorld = () => {
     setWallet(walletResponse.address);
   };
 
-  const onUpdatePressed = async () => {
-    const { status } = await updateMessage(walletAddress, newMessage);
-    setStatus(status);
-  };
-
-  //the UI of our component
   return (
     <div className="container">
       <Button variant="contained" onClick={connectWalletPressed}>
@@ -223,11 +218,13 @@ const HelloWorld = () => {
 
                 <Button
                   variant="contained"
-                  onClick={creatTicket}
+                  onClick={createTicketPressed}
                   sx={{ width: "100%", marginTop: "8px" }}
                 >
                   Criar ingresso
                 </Button>
+
+                <p id="status">{status}</p>
               </form>
             </CardContent>
           </Collapse>
@@ -254,26 +251,28 @@ const HelloWorld = () => {
           </CardActions>
           <Collapse in={expanded2} timeout="auto" unmountOnExit>
             <CardContent>
-              <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+              <TableContainer component={Paper} sx={{ overflow: 'scroll', }}>
+                <Table sx={{ minWidth: 650, overflow: 'scroll', }} aria-label="simple table">
                   <TableHead>
                     <TableRow>
                       <TableCell align="center">Nome do evento</TableCell>
-                      <TableCell align="center">Valor do ingresso</TableCell>
+                      <TableCell align="center">Organizador</TableCell>
+                      <TableCell align="center">Valor(wei)</TableCell>
+                      <TableCell align="center">Disponiveis</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {rows.map((row) => (
+                    {groupTickets.map((row) => (
                       <TableRow
-                        key={row.name}
+                        key={row.eventId}
                         sx={{
                           "&:last-child td, &:last-child th": { border: 0 },
                         }}
                       >
-                        <TableCell align="center">{row.nomeEvento}</TableCell>
-                        <TableCell align="center">
-                          {row.valorIngresso}
-                        </TableCell>
+                        <TableCell align="center">{row.eventName}</TableCell>
+                        <TableCell align="center">{row.organizer}</TableCell>
+                        <TableCell align="center">{row.value}</TableCell>
+                        <TableCell align="center">{row.quantity}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -283,67 +282,6 @@ const HelloWorld = () => {
           </Collapse>
         </Card>
       </div>
-
-      {/* <h2 style={{ paddingTop: "50px" }}>Current Message:</h2>
-      <p>{message}</p>\
-
-      <h2 style={{ paddingTop: "18px" }}>New Message:</h2>
-
-      <div>
-        <input
-          type="text"
-          placeholder="Update the message in your smart contract."
-          onChange={(e) => setNewMessage(e.target.value)}
-          value={newMessage}
-        />
-        <p id="status">{status}</p>
-
-        <button id="publish" onClick={onUpdatePressed}>
-          Update
-        </button>
-      </div>
-
-      <style jsx>{`
-        #container {
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-
-        #logo {
-          max-width: 100%;
-          height: auto;
-        }
-
-        #walletButton {
-          display: block;
-          margin: 10px auto;
-        }
-
-        h2 {
-          margin-top: 50px;
-        }
-
-        @media (max-width: 600px) {
-          h2 {
-            margin-top: 30px;
-          }
-
-          #walletButton {
-            font-size: 14px;
-          }
-        }
-
-        @media (max-width: 400px) {
-          h2 {
-            margin-top: 20px;
-          }
-
-          #walletButton {
-            font-size: 12px;
-          }
-        }
-      `}</style> */}
 
       <style jsx>{`
         .container {
