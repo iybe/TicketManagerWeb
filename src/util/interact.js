@@ -4,10 +4,10 @@ const alchemyKey = process.env.REACT_APP_ALCHEMY_KEY;
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
 const web3 = createAlchemyWeb3(alchemyKey);
 
-const { convertGetGroupsToJSON } = require("./utils");
+const { convertGetGroupsToJSON, convertNumberToHex } = require("./utils");
 
 const contractABI = require('../ticket-manager-abi.json')
-const contractAddress = "0x5572b1440888B8F48568BdE71Ce59C174BDA5a32";
+const contractAddress = "0x7a789c523e385a3339f2cf34912123ab2d5ab991";
 
 export const ticketContract = new web3.eth.Contract(
     contractABI,
@@ -18,6 +18,56 @@ export const loadGetGroupTickets = async () => {
     const message = await ticketContract.methods.getGroupTickets().call();
     return convertGetGroupsToJSON(message);
 };
+
+export const loadCreateTicket = async (address, data) => {
+
+    const transactionParameters = {
+        to: contractAddress,
+        from: address,
+        data: ticketContract.methods.createTickets(data.nomeEvento, data.limit, data.valorIngresso, data.quantidadeIngressos).encodeABI(),
+    };
+
+    return await signMessage(transactionParameters);
+};
+
+export const loadBuyTicket = async (address, data, value) => {
+    value = web3.utils.toHex(value);
+    console.log(value);
+    const transactionParameters = {
+        to: contractAddress,
+        from: address,
+        data: ticketContract.methods.buyTicket(data.idEvento, data.proprietario, data.sale).encodeABI(),
+        value: value    
+    };
+
+    return await signMessage(transactionParameters);
+};
+
+const signMessage = async (transactionParameters) => {
+    try {
+        const txHash = await window.ethereum.request({
+            method: "eth_sendTransaction",
+            params: [transactionParameters],
+        });
+        return {
+            status: (
+                <span>
+                    ✅{" "}
+                    <a target="_blank" href={`https://sepolia.etherscan.io/tx/${txHash}`}>
+                        View the status of your transaction on Etherscan!
+                    </a>
+                    <br />
+                    ℹ️ Once the transaction is verified by the network, the message will
+                    be updated automatically.
+                </span>
+            ),
+        };
+    } catch (error) {
+        return {
+            status: "😥 " + error.message,
+        };
+    }
+}
 
 export const getCurrentWalletConnected = async () => {
     if (window.ethereum) {
@@ -60,66 +110,6 @@ export const getCurrentWalletConnected = async () => {
         };
     }
 };
-
-export const loadCreateTicket = async (address, data) => {
-
-    const transactionParameters = {
-        to: contractAddress, // Required except during contract publications.
-        from: address, // must match user's active address.
-        data: ticketContract.methods.createTickets(data.nomeEvento, data.limit, data.valorIngresso, data.quantidadeIngressos).encodeABI(),
-    };
-
-    //sign the transaction
-    try {
-        const txHash = await window.ethereum.request({
-            method: "eth_sendTransaction",
-            params: [transactionParameters],
-        });
-        return {
-            status: (
-                <span>
-                    ✅{" "}
-                    <a target="_blank" href={`https://sepolia.etherscan.io/tx/${txHash}`}>
-                        View the status of your transaction on Etherscan!
-                    </a>
-                    <br />
-                    ℹ️ Once the transaction is verified by the network, the message will
-                    be updated automatically.
-                </span>
-            ),
-        };
-    } catch (error) {
-        return {
-            status: "😥 " + error.message,
-        };
-    }
-};
-
-const signMessage = async (transactionParameters) => {
-    try {
-        const txHash = await window.ethereum.request({
-            method: "eth_sendTransaction",
-            params: [transactionParameters],
-        });
-        return {
-            status: (
-                <span>
-                    ✅{" "}
-                    <a target="_blank" href={`https://sepolia.etherscan.io/tx/${txHash}`}>
-                        View the status of your transaction on Etherscan!
-                    </a>
-                    <br />
-                    ℹ️ Once the transaction is verified by the network, the message will
-                    be updated automatically.
-                </span>
-            ),
-        };
-    } catch (error) {
-        return {
-            status: "😥 " + error.message,
-        };
-    }
-}
 
 export const connectWallet = async () => {
     if (window.ethereum) {

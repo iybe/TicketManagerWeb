@@ -17,3 +17,11 @@ export function convertGetGroupsToJSON(arrayRetornado) {
 
     return arrayJSON;
 }
+
+export function convertNumberToHex(val) {
+    const number = Number(val);
+    console.log(number);
+    const hex = number.toString(16);
+    console.log(hex);
+    return "0x" + hex;
+}   
