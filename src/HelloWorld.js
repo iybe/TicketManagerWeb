@@ -234,7 +234,7 @@ const HelloWorld = () => {
 
         <Card>
           <div className="cardHeader">
-            <CardHeader sx={{ padding: "0px" }} title="Ingressos" />
+            <CardHeader sx={{ padding: "0px" }} title="Listar Ingressos" />
             <CardActions disableSpacing>
               <ExpandMore
                 expand={expanded2}
@@ -257,6 +257,7 @@ const HelloWorld = () => {
                 <Table aria-label="simple table">
                   <TableHead>
                     <TableRow>
+                      <TableCell align="center">ID do evento</TableCell>
                       <TableCell align="center">Nome do evento</TableCell>
                       <TableCell align="center">Organizador</TableCell>
                       <TableCell align="center">Valor(wei)</TableCell>
@@ -271,6 +272,7 @@ const HelloWorld = () => {
                           "&:last-child td, &:last-child th": { border: 0 },
                         }}
                       >
+                        <TableCell align="center">{row.eventId}</TableCell>
                         <TableCell align="center">{row.eventName}</TableCell>
                         <TableCell
                           align="center"
