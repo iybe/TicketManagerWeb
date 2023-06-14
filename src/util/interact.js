@@ -4,7 +4,7 @@ const alchemyKey = process.env.REACT_APP_ALCHEMY_KEY;
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
 const web3 = createAlchemyWeb3(alchemyKey);
 
-const { convertGetGroupsToJSON, convertNumberToHex } = require("./utils");
+const { convertGetGroupsToJSON, convertTicketToJSON } = require("./utils");
 
 const contractABI = require('../ticket-manager-abi.json')
 const contractAddress = "0x7a789c523e385a3339f2cf34912123ab2d5ab991";
@@ -17,6 +17,13 @@ export const ticketContract = new web3.eth.Contract(
 export const loadGetGroupTickets = async () => {
     const message = await ticketContract.methods.getGroupTickets().call();
     return convertGetGroupsToJSON(message);
+};
+
+export const loadFilterTicketsByOwner = async (eventId, owner, transferable, sale) => {
+    console.log(eventId, owner, transferable, sale);
+    const message = await ticketContract.methods.filterTicketsByOwner(eventId, owner, transferable, sale).call();
+    console.log(message);
+    return convertTicketToJSON(message);
 };
 
 export const loadCreateTicket = async (address, data) => {

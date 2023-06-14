@@ -18,6 +18,32 @@ export function convertGetGroupsToJSON(arrayRetornado) {
     return arrayJSON;
 }
 
+export function convertTicketToJSON(arrayRetornado) {
+    const arrayJSON = [];
+    console.log(arrayRetornado);
+    for (let i = 0; i < arrayRetornado.length; i++) {
+      const [id, eventId, eventName, owner, organizer, age, limit, value, sale] = arrayRetornado[i];
+      const saleS = sale ? "Sim" : "Não";
+
+      const ticket = {
+        id: id,
+        eventId: eventId,
+        eventName: eventName,
+        owner: owner,
+        organizer: organizer,
+        age: age,
+        limit: limit,
+        value: value,
+        sale: saleS
+      };
+  
+      arrayJSON.push(ticket);
+    }
+  
+    return arrayJSON;
+  }
+  
+
 export function convertNumberToHex(val) {
     const number = Number(val);
     console.log(number);

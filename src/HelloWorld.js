@@ -6,6 +6,7 @@ import {
   loadBuyTicket,
   loadGetGroupTickets,
   getCurrentWalletConnected,
+  loadFilterTicketsByOwner
 } from "./util/interact.js";
 
 // Material UI
@@ -28,7 +29,6 @@ import Paper from "@mui/material/Paper";
 import CopyAllIcon from "@mui/icons-material/CopyAll";
 
 const HelloWorld = () => {
-  //state variables
   const [walletAddress, setWallet] = useState("");
   const [status, setStatus] = useState("");
   const [statusBuyTicket, setStatusBuyTicket] = useState("");
@@ -58,6 +58,13 @@ const HelloWorld = () => {
     setExpanded3(!expanded3);
   };
 
+  const [expanded4, setExpanded4] = React.useState(false);
+  const handleExpandClick4 = () => {
+    setExpanded4(!expanded4);
+  };
+
+  const [showDisconnectButton , setShowDisconnectButton] = React.useState(false);
+
   const [valores, setValores] = useState({
     nomeEvento: "",
     valorIngresso: "",
@@ -79,6 +86,12 @@ const HelloWorld = () => {
 
     const { status } = await loadCreateTicket(walletAddress, valores);
     setStatus(status);
+  };
+
+  const listMyTicketsPressed = async () => {
+    const myTicketsR = await loadFilterTicketsByOwner(0, walletAddress, true, true);
+    console.log("myTicketsR", myTicketsR);
+    setMyTickets(myTicketsR);
   };
 
   const buyTicketPressed = async () => {
@@ -106,9 +119,11 @@ const HelloWorld = () => {
   const handleCheckComprarIngresso = (check) => {
     setinputComprarIngresso({ ...inputComprarIngresso, ["sale"]: check });
   };
-  
+
 
   const [groupTickets, setGroupTickets] = useState([]);
+
+  const [myTickets, setMyTickets] = useState([]);
 
   const copyToClipboard = (text) => {
     console.log("copyToClipboard:", text);
@@ -117,6 +132,15 @@ const HelloWorld = () => {
 
   //called only once
   useEffect(() => {
+    async function fetchWallet() {
+      const { address, status } = await getCurrentWalletConnected();
+      setWallet(address);
+      setStatus(status);
+      setShowDisconnectButton(true);
+    }
+    fetchWallet();
+    addWalletListener();
+
     async function fetchMessage() {
       const vals = await loadGetGroupTickets();
       console.log("getGroupTickets:", vals);
@@ -124,14 +148,6 @@ const HelloWorld = () => {
     }
 
     fetchMessage();
-
-    async function fetchWallet() {
-      const { address, status } = await getCurrentWalletConnected();
-      setWallet(address);
-      setStatus(status);
-    }
-    fetchWallet();
-    addWalletListener();
   }, []);
 
   function addWalletListener() {
@@ -165,6 +181,14 @@ const HelloWorld = () => {
     setWallet(walletResponse.address);
   };
 
+  const disconnectWalletPressed = async () => {
+    if (window.ethereum) {
+      setShowDisconnectButton(false);
+      setWallet("");
+      setStatus("🦊 Connect to Metamask using the top right button.");
+    }
+  }
+
   return (
     <div className="container">
       <Button variant="contained" onClick={connectWalletPressed}>
@@ -176,6 +200,9 @@ const HelloWorld = () => {
         ) : (
           <span>Connect Wallet</span>
         )}
+      </Button>
+      <Button variant="contained" onClick={disconnectWalletPressed} disable={showDisconnectButton}>
+        Disconnect Wallet
       </Button>
 
       <div className="cards">
@@ -313,8 +340,8 @@ const HelloWorld = () => {
                             variant="text"
                             onClick={() => copyToClipboard(row.value)}
                           >
-                            <CopyAllIcon />  
-                          </Button>  
+                            <CopyAllIcon />
+                          </Button>
                         </TableCell>
                         <TableCell align="center">{row.quantity}</TableCell>
                       </TableRow>
@@ -377,8 +404,8 @@ const HelloWorld = () => {
                       <Checkbox
                         checked={inputComprarIngresso.sale}
                         onChange={(event) => {
-                            handleCheckComprarIngresso(!inputComprarIngresso.sale)
-                          }
+                          handleCheckComprarIngresso(!inputComprarIngresso.sale)
+                        }
                         }
                         name="sale"
                       />
@@ -398,6 +425,73 @@ const HelloWorld = () => {
 
                 <p id="status">{statusBuyTicket}</p>
               </form>
+            </CardContent>
+          </Collapse>
+        </Card>
+
+        <Card>
+          <div className="cardHeader">
+            <CardHeader sx={{ padding: "0px" }} title="Meus Ingressos" />
+            <CardActions disableSpacing>
+              <ExpandMore
+                expand={expanded4}
+                onClick={handleExpandClick4}
+                aria-expanded={expanded4}
+                aria-label="show more"
+              >
+                <ExpandMoreIcon />
+              </ExpandMore>
+            </CardActions>
+          </div>
+          <Collapse
+            in={expanded4}
+            timeout="auto"
+            unmountOnExit
+            className="collapse"
+          >
+            <CardContent>
+              <Button
+                variant="contained"
+                onClick={listMyTicketsPressed}
+                sx={{ width: "100%", marginTop: "8px" }}
+              >
+                Listar meus ingressos
+              </Button>
+              <TableContainer component={Paper}>
+                <Table aria-label="simple table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell align="center">ID do ingresso</TableCell>
+                      <TableCell align="center">ID do evento</TableCell>
+                      <TableCell align="center">Nome do evento</TableCell>
+                      <TableCell align="center">Organizador</TableCell>
+                      <TableCell align="center">Valor(wei)</TableCell>
+                      <TableCell align="center">Tranferencias</TableCell>
+                      <TableCell align="center">Limite</TableCell>
+                      <TableCell align="center">Sale</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {myTickets.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        sx={{
+                          "&:last-child td, &:last-child th": { border: 0 },
+                        }}
+                      >
+                        <TableCell align="center">{row.id}</TableCell>
+                        <TableCell align="center">{row.eventId}</TableCell>
+                        <TableCell align="center">{row.eventName}</TableCell>
+                        <TableCell align="center">{row.organizer}</TableCell>
+                        <TableCell align="center">{row.value}</TableCell>
+                        <TableCell align="center">{row.age}</TableCell>
+                        <TableCell align="center">{row.limit}</TableCell>
+                        <TableCell align="center">{row.sale}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </CardContent>
           </Collapse>
         </Card>
