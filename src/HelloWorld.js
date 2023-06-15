@@ -10,6 +10,7 @@ import {
   loadGetInvalidateTicketsByOwner
 } from "./util/interact.js";
 import QrCode from 'react-qr-code';
+import { QrReader } from 'react-qr-reader';
 
 // Material UI
 import Button from "@mui/material/Button";
@@ -82,6 +83,35 @@ const HelloWorld = () => {
 
   const handleCloseModalQrCode = () => {
     setOpenModalQrCode(false);
+  };
+
+  const [openModalQrReader, setOpenModalQrReader] = useState(false);
+  const [qrCodeReader, setQrCodeReader] = useState("");
+
+  const handleOpenModalQrReader = () => {
+    setOpenModalQrReader(true);
+  };
+
+  const handleCloseModalQrReader = () => {
+    setOpenModalQrReader(false);
+  };
+
+  const handleScan = (data, error) => {
+    console.log("data", data);
+    if (!!data) {
+      setQrCodeReader(data?.text);
+      setOpenModalQrReader(false);
+      setOpenModalVerificar(true);
+    }
+    if (!!error) {
+      console.info(error);
+    }
+  };
+
+  const [openModalVerificar, setOpenModalVerificar] = useState(false);
+
+  const handleCloseModalVerificar = () => {
+    setOpenModalVerificar(false);
   };
 
   const [showDisconnectButton, setShowDisconnectButton] = React.useState(false);
@@ -604,15 +634,61 @@ const HelloWorld = () => {
             </CardContent>
           </Collapse>
         </Card>
+
+        <Card>
+          <div className="cardHeader">
+            <button onClick={handleOpenModalQrReader}>Validar Ingresso</button>
+          </div>
+        </Card>
       </div>
 
       <Modal open={openModalQrCode} onClose={handleCloseModalQrCode}>
-        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
-          <QrCode value={qrCodeContent} />
-          <Button onClick={handleCloseModalQrCode}>Fechar</Button>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+          }}
+        >
+          <Box
+            sx={{
+              width: 400,
+              bgcolor: 'background.paper',
+              border: '2px solid #000',
+              borderRadius: '8px',
+              p: 4,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
+            <QrCode value={qrCodeContent} size={300} />
+
+            <Button onClick={handleCloseModalQrCode} sx={{ mt: 4 }}>
+              Fechar
+            </Button>
+          </Box>
         </Box>
       </Modal>
 
+      <Modal open={openModalQrReader} onClose={handleCloseModalQrReader}>
+        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+          <h2>Leitor de QR Code</h2>
+          <QrReader delay={300} onResult={handleScan} style={{ width: '100%' }} constraints={{
+            facingMode: 'environment'
+          }} />
+          <Button onClick={handleCloseModalQrReader}>Fechar</Button>
+        </Box>
+      </Modal>
+
+      <Modal open={openModalVerificar} onClose={handleCloseModalVerificar}>
+        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+          <h2>Verificar Ingresso</h2>
+          <p>{qrCodeReader}</p>
+          <Button onClick={handleCloseModalVerificar}>Fechar</Button>
+        </Box>
+      </Modal>
 
       <style jsx>{`
         .container {
