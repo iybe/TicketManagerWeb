@@ -6,7 +6,8 @@ import {
   loadBuyTicket,
   loadGetGroupTickets,
   getCurrentWalletConnected,
-  loadFilterTicketsByOwner
+  loadFilterTicketsByOwner,
+  loadGetInvalidateTicketsByOwner
 } from "./util/interact.js";
 
 // Material UI
@@ -63,6 +64,11 @@ const HelloWorld = () => {
     setExpanded4(!expanded4);
   };
 
+  const [expanded5, setExpanded5] = React.useState(false);
+  const handleExpandClick5 = () => {
+    setExpanded5(!expanded5);
+  };
+
   const [showDisconnectButton , setShowDisconnectButton] = React.useState(false);
 
   const [valores, setValores] = useState({
@@ -95,6 +101,14 @@ const HelloWorld = () => {
     const myTicketsR = await loadFilterTicketsByOwner(0, walletAddress, transferibleButton, saleButton);
     console.log("myTicketsR", myTicketsR);
     setMyTickets(myTicketsR);
+  };
+
+  const [myInvalidateTickets, setMyInvalidateTickets] = useState([]);
+
+  const listMyInvalidateTicketsPressed = async () => {
+    const myInvalidateTicketsR = await loadGetInvalidateTicketsByOwner(walletAddress);
+    console.log("myInvalidateTicketsR", myInvalidateTicketsR);
+    setMyInvalidateTickets(myInvalidateTicketsR);
   };
 
   const buyTicketPressed = async () => {
@@ -504,6 +518,67 @@ const HelloWorld = () => {
                         <TableCell align="center">{row.age}</TableCell>
                         <TableCell align="center">{row.limit}</TableCell>
                         <TableCell align="center">{row.sale}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Collapse>
+        </Card>
+
+        <Card>
+          <div className="cardHeader">
+            <CardHeader sx={{ padding: "0px" }} title="Meus Ingressos Invalidos" />
+            <CardActions disableSpacing>
+              <ExpandMore
+                expand={expanded5}
+                onClick={handleExpandClick5}
+                aria-expanded={expanded5}
+                aria-label="show more"
+              >
+                <ExpandMoreIcon />
+              </ExpandMore>
+            </CardActions>
+          </div>
+          <Collapse
+            in={expanded5}
+            timeout="auto"
+            unmountOnExit
+            className="collapse"
+          >
+            <CardContent>
+              <Button
+                variant="contained"
+                onClick={listMyInvalidateTicketsPressed}
+                sx={{ width: "100%", marginTop: "8px" }}
+              >
+                Listar ingressos
+              </Button>
+              <TableContainer component={Paper}>
+                <Table aria-label="simple table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell align="center">ID do ingresso</TableCell>
+                      <TableCell align="center">ID do evento</TableCell>
+                      <TableCell align="center">Proprietario</TableCell>
+                      <TableCell align="center">Organizador</TableCell>
+                      <TableCell align="center">Codigo</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {myInvalidateTickets.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        sx={{
+                          "&:last-child td, &:last-child th": { border: 0 },
+                        }}
+                      >
+                        <TableCell align="center">{row.id}</TableCell>
+                        <TableCell align="center">{row.eventId}</TableCell>
+                        <TableCell align="center">{row.owner}</TableCell>
+                        <TableCell align="center">{row.organizer}</TableCell>
+                        <TableCell align="center">{row.code}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
