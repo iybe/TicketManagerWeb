@@ -7,7 +7,7 @@ const web3 = createAlchemyWeb3(alchemyKey);
 const { convertGetGroupsToJSON, convertTicketToJSON } = require("./utils");
 
 const contractABI = require('../ticket-manager-abi.json')
-const contractAddress = "0x7a789c523e385a3339f2cf34912123ab2d5ab991";
+const contractAddress = "0x047ff88cea1a1e3579744bfb8f21ab00f6fe87e8";
 
 export const ticketContract = new web3.eth.Contract(
     contractABI,
