@@ -75,6 +75,9 @@ const HelloWorld = () => {
     setValores({ ...valores, [event.target.name]: event.target.value });
   };
 
+  const [transferibleButton, setTransferibleButton] = useState(true)
+  const [saleButton, setSaleButton] = useState(true)
+
   const createTicketPressed = async () => {
     const { nomeEvento, valorIngresso, limit, quantidadeIngressos } = valores;
     console.log("input de createTicketPressed:", valores);
@@ -89,7 +92,7 @@ const HelloWorld = () => {
   };
 
   const listMyTicketsPressed = async () => {
-    const myTicketsR = await loadFilterTicketsByOwner(0, walletAddress, true, true);
+    const myTicketsR = await loadFilterTicketsByOwner(0, walletAddress, transferibleButton, saleButton);
     console.log("myTicketsR", myTicketsR);
     setMyTickets(myTicketsR);
   };
@@ -456,6 +459,20 @@ const HelloWorld = () => {
                 sx={{ width: "100%", marginTop: "8px" }}
               >
                 Listar meus ingressos
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => {setTransferibleButton(!transferibleButton)}}
+                sx={{ width: "100%", marginTop: "8px", backgroundColor: transferibleButton ? 'green' : 'red', }}
+              >
+                Transferiveis
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => {setSaleButton(!saleButton)}}
+                sx={{ width: "100%", marginTop: "8px", backgroundColor: saleButton ? 'green' : 'red', }}
+              >
+                A venda
               </Button>
               <TableContainer component={Paper}>
                 <Table aria-label="simple table">
