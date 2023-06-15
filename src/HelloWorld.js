@@ -1,5 +1,5 @@
 import React from "react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
   connectWallet,
   loadCreateTicket,
@@ -9,6 +9,7 @@ import {
   loadFilterTicketsByOwner,
   loadGetInvalidateTicketsByOwner
 } from "./util/interact.js";
+import QrCode from 'react-qr-code';
 
 // Material UI
 import Button from "@mui/material/Button";
@@ -28,6 +29,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import CopyAllIcon from "@mui/icons-material/CopyAll";
+import { Modal, Box } from "@mui/material";
 
 const HelloWorld = () => {
   const [walletAddress, setWallet] = useState("");
@@ -69,7 +71,20 @@ const HelloWorld = () => {
     setExpanded5(!expanded5);
   };
 
-  const [showDisconnectButton , setShowDisconnectButton] = React.useState(false);
+  const [openModalQrCode, setOpenModalQrCode] = useState(false);
+  const [qrCodeContent, setQrCodeContent] = useState('');
+
+
+  const handleOpenModalQrCode = (code, eventId, owner) => {
+    setQrCodeContent(`{"code": "${code}", "eventId": "${eventId}", "owner": "${owner}"}`);
+    setOpenModalQrCode(true);
+  };
+
+  const handleCloseModalQrCode = () => {
+    setOpenModalQrCode(false);
+  };
+
+  const [showDisconnectButton, setShowDisconnectButton] = React.useState(false);
 
   const [valores, setValores] = useState({
     nomeEvento: "",
@@ -476,14 +491,14 @@ const HelloWorld = () => {
               </Button>
               <Button
                 variant="contained"
-                onClick={() => {setTransferibleButton(!transferibleButton)}}
+                onClick={() => { setTransferibleButton(!transferibleButton) }}
                 sx={{ width: "100%", marginTop: "8px", backgroundColor: transferibleButton ? 'green' : 'red', }}
               >
                 Transferiveis
               </Button>
               <Button
                 variant="contained"
-                onClick={() => {setSaleButton(!saleButton)}}
+                onClick={() => { setSaleButton(!saleButton) }}
                 sx={{ width: "100%", marginTop: "8px", backgroundColor: saleButton ? 'green' : 'red', }}
               >
                 A venda
@@ -564,6 +579,7 @@ const HelloWorld = () => {
                       <TableCell align="center">Proprietario</TableCell>
                       <TableCell align="center">Organizador</TableCell>
                       <TableCell align="center">Codigo</TableCell>
+                      <TableCell align="center">QrCode</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -579,6 +595,7 @@ const HelloWorld = () => {
                         <TableCell align="center">{row.owner}</TableCell>
                         <TableCell align="center">{row.organizer}</TableCell>
                         <TableCell align="center">{row.code}</TableCell>
+                        <Button variant="contained" onClick={() => { handleOpenModalQrCode(row.code, row.eventId, row.owner) }}>Abrir Modal</Button>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -588,6 +605,14 @@ const HelloWorld = () => {
           </Collapse>
         </Card>
       </div>
+
+      <Modal open={openModalQrCode} onClose={handleCloseModalQrCode}>
+        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+          <QrCode value={qrCodeContent} />
+          <Button onClick={handleCloseModalQrCode}>Fechar</Button>
+        </Box>
+      </Modal>
+
 
       <style jsx>{`
         .container {
