@@ -45,7 +45,7 @@ export const signTicket = async (ticketId, address) => {
         console.log("s", s);
         console.log("v", v);
 
-        return assinatura;
+        return hashedMessage, r, s, v;
     } else {
         console.error('MetaMask não detectado');
     }

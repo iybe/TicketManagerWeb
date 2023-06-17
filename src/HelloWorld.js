@@ -78,8 +78,8 @@ const HelloWorld = () => {
 
 
   const handleOpenModalQrCode = (ticketId, walletAddress) => {
-    signTicket(ticketId, walletAddress).then((assinatura) => {
-      setQrCodeContent(assinatura);
+    signTicket(ticketId, walletAddress).then((hashedMessage, r, s, v) => {
+      setQrCodeContent(JSON.stringify({ ticketId, walletAddress, hashedMessage, r, s, v }));
       setOpenModalQrCode(true);
     }).catch((error) => {
       console.log("error", error);
