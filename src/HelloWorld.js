@@ -7,7 +7,8 @@ import {
   loadGetGroupTickets,
   getCurrentWalletConnected,
   loadFilterTicketsByOwner,
-  loadGetInvalidateTicketsByOwner
+  loadGetInvalidateTicketsByOwner,
+  signTicket
 } from "./util/interact.js";
 import QrCode from 'react-qr-code';
 import { QrReader } from 'react-qr-reader';
@@ -76,9 +77,13 @@ const HelloWorld = () => {
   const [qrCodeContent, setQrCodeContent] = useState('');
 
 
-  const handleOpenModalQrCode = (code, eventId, owner) => {
-    setQrCodeContent(`{"code": "${code}", "eventId": "${eventId}", "owner": "${owner}"}`);
-    setOpenModalQrCode(true);
+  const handleOpenModalQrCode = (ticketId, walletAddress) => {
+    signTicket(ticketId, walletAddress).then((assinatura) => {
+      setQrCodeContent(assinatura);
+      setOpenModalQrCode(true);
+    }).catch((error) => {
+      console.log("error", error);
+    });
   };
 
   const handleCloseModalQrCode = () => {
@@ -545,6 +550,7 @@ const HelloWorld = () => {
                       <TableCell align="center">Tranferencias</TableCell>
                       <TableCell align="center">Limite</TableCell>
                       <TableCell align="center">Sale</TableCell>
+                      <TableCell align="center">QrCode</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -563,6 +569,7 @@ const HelloWorld = () => {
                         <TableCell align="center">{row.age}</TableCell>
                         <TableCell align="center">{row.limit}</TableCell>
                         <TableCell align="center">{row.sale}</TableCell>
+                        <Button variant="contained" onClick={() => { handleOpenModalQrCode(row.id, walletAddress) }}>Abrir Modal</Button>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -609,7 +616,7 @@ const HelloWorld = () => {
                       <TableCell align="center">Proprietario</TableCell>
                       <TableCell align="center">Organizador</TableCell>
                       <TableCell align="center">Codigo</TableCell>
-                      <TableCell align="center">QrCode</TableCell>
+                      {/* <TableCell align="center">QrCode</TableCell> */}
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -625,7 +632,7 @@ const HelloWorld = () => {
                         <TableCell align="center">{row.owner}</TableCell>
                         <TableCell align="center">{row.organizer}</TableCell>
                         <TableCell align="center">{row.code}</TableCell>
-                        <Button variant="contained" onClick={() => { handleOpenModalQrCode(row.code, row.eventId, row.owner) }}>Abrir Modal</Button>
+                        {/* <Button variant="contained" onClick={() => { handleOpenModalQrCode(row.code, row.eventId, row.owner) }}>Abrir Modal</Button> */}
                       </TableRow>
                     ))}
                   </TableBody>

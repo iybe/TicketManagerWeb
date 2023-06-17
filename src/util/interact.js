@@ -7,7 +7,7 @@ const web3 = createAlchemyWeb3(alchemyKey);
 const { convertGetGroupsToJSON, convertTicketToJSON, convertInvalidateTicketToJSON } = require("./utils");
 
 const contractABI = require('../ticket-manager-abi.json')
-const contractAddress = "0x047ff88cea1a1e3579744bfb8f21ab00f6fe87e8";
+const contractAddress = "0x476655618ce54d2e3cafb09216c32788465b2a50";
 
 export const ticketContract = new web3.eth.Contract(
     contractABI,
@@ -25,6 +25,31 @@ export const loadFilterTicketsByOwner = async (eventId, owner, transferable, sal
     console.log(message);
     return convertTicketToJSON(message);
 };
+
+export const signTicket = async (ticketId, address) => {
+    if (typeof window.ethereum !== 'undefined') {
+        const message = `ticketId=${ticketId}`;
+        const hashedMessage = web3.utils.sha3(message);
+        console.log("hashedMessage", hashedMessage);
+
+        const assinatura = await window.ethereum.request({
+            method: 'personal_sign',
+            params: [hashedMessage, address],
+            from: address
+        });
+
+        const r = assinatura.slice(0, 66);
+        const s = "0x" + assinatura.slice(66, 130);
+        const v = parseInt(assinatura.slice(130, 132), 16);
+        console.log("r", r);
+        console.log("s", s);
+        console.log("v", v);
+
+        return assinatura;
+    } else {
+        console.error('MetaMask não detectado');
+    }
+}
 
 export const loadGetInvalidateTicketsByOwner = async (owner) => {
     const message = await ticketContract.methods.getAllInvalidateTicketByOwner(owner).call();
@@ -50,7 +75,7 @@ export const loadBuyTicket = async (address, data, value) => {
         to: contractAddress,
         from: address,
         data: ticketContract.methods.buyTicket(data.idEvento, data.proprietario, data.sale).encodeABI(),
-        value: value    
+        value: value
     };
 
     return await signMessage(transactionParameters);
