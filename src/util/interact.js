@@ -51,12 +51,6 @@ export const signTicket = async (ticketId, address) => {
     }
 }
 
-export const loadGetInvalidateTicketsByOwner = async (owner) => {
-    const message = await ticketContract.methods.getAllInvalidateTicketByOwner(owner).call();
-    console.log(message);
-    return convertInvalidateTicketToJSON(message);
-};
-
 export const loadCreateTicket = async (address, data) => {
 
     const transactionParameters = {

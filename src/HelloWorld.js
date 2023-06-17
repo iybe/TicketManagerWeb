@@ -167,16 +167,7 @@ const HelloWorld = () => {
 
   const listMyTicketsPressed = async () => {
     const myTicketsR = await loadFilterTicketsByOwner(0, walletAddress, transferibleButton, saleButton);
-    console.log("myTicketsR", myTicketsR);
     setMyTickets(myTicketsR);
-  };
-
-  const [myInvalidateTickets, setMyInvalidateTickets] = useState([]);
-
-  const listMyInvalidateTicketsPressed = async () => {
-    const myInvalidateTicketsR = await loadGetInvalidateTicketsByOwner(walletAddress);
-    console.log("myInvalidateTicketsR", myInvalidateTicketsR);
-    setMyInvalidateTickets(myInvalidateTicketsR);
   };
 
   const buyTicketPressed = async () => {
@@ -205,17 +196,14 @@ const HelloWorld = () => {
     setinputComprarIngresso({ ...inputComprarIngresso, ["sale"]: check });
   };
 
-
   const [groupTickets, setGroupTickets] = useState([]);
 
   const [myTickets, setMyTickets] = useState([]);
 
   const copyToClipboard = (text) => {
-    console.log("copyToClipboard:", text);
     navigator.clipboard.writeText(text);
   };
 
-  //called only once
   useEffect(() => {
     async function fetchWallet() {
       const { address, status } = await getCurrentWalletConnected();
@@ -228,7 +216,6 @@ const HelloWorld = () => {
 
     async function fetchMessage() {
       const vals = await loadGetGroupTickets();
-      console.log("getGroupTickets:", vals);
       setGroupTickets(vals);
     }
 
@@ -599,7 +586,7 @@ const HelloWorld = () => {
 
         <Card>
           <div className="cardHeader">
-            <CardHeader sx={{ padding: "0px" }} title="Meus Ingressos Invalidos" />
+            <CardHeader sx={{ padding: "0px" }} title="Validar Ingresso" />
             <CardActions disableSpacing>
               <ExpandMore
                 expand={expanded5}
@@ -620,50 +607,13 @@ const HelloWorld = () => {
             <CardContent>
               <Button
                 variant="contained"
-                onClick={listMyInvalidateTicketsPressed}
+                onClick={handleOpenModalQrReader}
                 sx={{ width: "100%", marginTop: "8px" }}
               >
-                Listar ingressos
+                Validar Ingresso
               </Button>
-              <TableContainer component={Paper}>
-                <Table aria-label="simple table">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell align="center">ID do ingresso</TableCell>
-                      <TableCell align="center">ID do evento</TableCell>
-                      <TableCell align="center">Proprietario</TableCell>
-                      <TableCell align="center">Organizador</TableCell>
-                      <TableCell align="center">Codigo</TableCell>
-                      {/* <TableCell align="center">QrCode</TableCell> */}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {myInvalidateTickets.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                        }}
-                      >
-                        <TableCell align="center">{row.id}</TableCell>
-                        <TableCell align="center">{row.eventId}</TableCell>
-                        <TableCell align="center">{row.owner}</TableCell>
-                        <TableCell align="center">{row.organizer}</TableCell>
-                        <TableCell align="center">{row.code}</TableCell>
-                        {/* <Button variant="contained" onClick={() => { handleOpenModalQrCode(row.code, row.eventId, row.owner) }}>Abrir Modal</Button> */}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
             </CardContent>
           </Collapse>
-        </Card>
-
-        <Card>
-          <div className="cardHeader">
-            <button onClick={handleOpenModalQrReader}>Validar Ingresso</button>
-          </div>
         </Card>
       </div>
 
