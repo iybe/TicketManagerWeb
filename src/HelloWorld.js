@@ -155,6 +155,7 @@ const HelloWorld = () => {
 
   const handleCloseModalVerificar = () => {
     setOpenModalVerificar(false);
+    setStatusVerificar("");
   };
 
   const [statusVerificar, setStatusVerificar] = useState("");
@@ -165,8 +166,13 @@ const HelloWorld = () => {
     const tickeIdNumber = parseInt(ticketId);
     console.log("qrCodeReader", qrCodeReader);
     console.log("tickeIdNumber", tickeIdNumber);
-    const { status } = await loadVerifyTicket(tickeIdNumber, walletAddress, hashedMessage, r, s, v);
-    setStatusVerificar(status);
+    const txn = await loadVerifyTicket(tickeIdNumber, walletAddress, hashedMessage, r, s, v);
+    console.log("txn", txn);
+    checkTransactionConfirmation(txn).then((res) => {
+      setStatusVerificar(res + " O ingresso foi validado sucesso!");
+    }).catch((error) => {
+      setStatusVerificar("Erro:" + error);
+    });
   };
 
   const [showDisconnectButton, setShowDisconnectButton] = React.useState(false);
@@ -200,7 +206,7 @@ const HelloWorld = () => {
     setOpenModalTransacao(true);
     setMsgModalTransacao("Transação enviada. Aguardando confirmação...");
     checkTransactionConfirmation(txn).then((res) => {
-      setMsgModalTransacao(res+" Os ingressos foram criados com sucesso!");
+      setMsgModalTransacao(res + " Os ingressos foram criados com sucesso!");
     });
   };
 
@@ -234,7 +240,7 @@ const HelloWorld = () => {
     setOpenModalTransacao(true);
     setMsgModalTransacao("Transação enviada. Aguardando confirmação...");
     checkTransactionConfirmation(txn).then((res) => {
-      setMsgModalTransacao(res+" Ingresso comprado com sucesso!");
+      setMsgModalTransacao(res + " Ingresso comprado com sucesso!");
     });
   };
 
@@ -722,10 +728,12 @@ const HelloWorld = () => {
       </Modal>
 
       <Modal open={openModalTransacao} onClose={handleCloseModalTransacao}>
-        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
-          <h2>{tituloModalTransacao}</h2>
-          <p>{msgModalTransacao}</p>
-          <Button onClick={handleCloseModalTransacao}>Fechar</Button>
+        <Box className='boxModal' sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+          <div>
+            <h2>{tituloModalTransacao}</h2>
+            <p>{msgModalTransacao}</p>
+            <Button onClick={handleCloseModalTransacao}>Fechar</Button>
+          </div>
         </Box>
       </Modal>
 
@@ -764,6 +772,11 @@ const HelloWorld = () => {
 
         /* Deixar o form com 1fr no celular */
         @media (max-width: 600px) {
+          .boxModal {
+            width: 200px;
+            padding: 50px;
+          }
+
           .collapse {
             overflow-x: scroll;
           }

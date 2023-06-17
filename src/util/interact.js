@@ -107,34 +107,18 @@ export const loadVerifyTicket = async (ticketId, walletAddress, hashedMessage, r
         from: walletAddress,
         data: ticketContract.methods.verifyTicket(ticketId, hashedMessage, walletAddress, v, r, s).encodeABI()
     };
-    return await signMessage(transactionParameters);
-};
 
-const signMessage = async (transactionParameters) => {
     try {
         const txHash = await window.ethereum.request({
             method: "eth_sendTransaction",
             params: [transactionParameters],
         });
-        return {
-            status: (
-                <span>
-                    ✅{" "}
-                    <a target="_blank" href={`https://sepolia.etherscan.io/tx/${txHash}`}>
-                        View the status of your transaction on Etherscan!
-                    </a>
-                    <br />
-                    ℹ️ Once the transaction is verified by the network, the message will
-                    be updated automatically.
-                </span>
-            ),
-        };
+        return txHash
     } catch (error) {
-        return {
-            status: "😥 " + error.message,
-        };
+        console.log(error);
+        return error
     }
-}
+};
 
 export const getCurrentWalletConnected = async () => {
     if (window.ethereum) {
