@@ -1,3 +1,7 @@
+import {
+  weiToEther
+} from "./interact"
+
 export function convertGetGroupsToJSON(arrayRetornado) {
   const arrayJSON = [];
 
@@ -8,7 +12,7 @@ export function convertGetGroupsToJSON(arrayRetornado) {
       eventId: eventId,
       eventName: eventName,
       organizer: organizer,
-      value: value,
+      value: weiToEther(value),
       quantity: quantity
     };
 
@@ -33,7 +37,7 @@ export function convertTicketToJSON(arrayRetornado) {
       organizer: organizer,
       age: age,
       limit: limit,
-      value: value,
+      value: weiToEther(value),
       sale: saleS
     };
 
@@ -42,32 +46,3 @@ export function convertTicketToJSON(arrayRetornado) {
 
   return arrayJSON;
 }
-
-export function convertInvalidateTicketToJSON(arrayRetornado) {
-  const arrayJSON = [];
-
-  for (let i = 0; i < arrayRetornado.length; i++) {
-    const [id, eventId, owner, organizer, code] = arrayRetornado[i];
-
-    const ticket = {
-      id: id,
-      eventId: eventId,
-      owner: owner,
-      organizer: organizer,
-      code: code
-    };
-
-    arrayJSON.push(ticket);
-  }
-
-  return arrayJSON;
-}
-
-
-export function convertNumberToHex(val) {
-  const number = Number(val);
-  console.log(number);
-  const hex = number.toString(16);
-  console.log(hex);
-  return "0x" + hex;
-}   

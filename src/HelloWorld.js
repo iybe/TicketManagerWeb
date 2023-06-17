@@ -7,9 +7,9 @@ import {
   loadGetGroupTickets,
   getCurrentWalletConnected,
   loadFilterTicketsByOwner,
-  loadGetInvalidateTicketsByOwner,
   signTicket,
-  loadVerifyTicket
+  loadVerifyTicket,
+  checkTransactionConfirmation
 } from "./util/interact.js";
 import QrCode from 'react-qr-code';
 import { QrReader } from 'react-qr-reader';
@@ -42,6 +42,13 @@ const HelloWorld = () => {
   const [expanded, setExpanded] = React.useState(false);
   const handleExpandClick = () => {
     setExpanded(!expanded);
+    setValores({
+      nomeEvento: "",
+      valorIngresso: "",
+      limit: "",
+      quantidadeIngressos: "",
+    });
+    setStatus("");
   };
   const ExpandMore = styled((props) => {
     const { expand, ...other } = props;
@@ -56,11 +63,25 @@ const HelloWorld = () => {
 
   const [expanded2, setExpanded2] = React.useState(false);
   const handleExpandClick2 = () => {
+    if (!expanded2) {
+      loadGetGroupTickets().then((res) => {
+        setGroupTickets(res);
+      });
+    }
     setExpanded2(!expanded2);
   };
 
   const [expanded3, setExpanded3] = React.useState(false);
   const handleExpandClick3 = () => {
+    if (!expanded3) {
+      setinputComprarIngresso({
+        idEvento: "",
+        proprietario: "",
+        valor: 0,
+        sale: false,
+      });
+      setStatusBuyTicket("");
+    }
     setExpanded3(!expanded3);
   };
 
@@ -153,6 +174,7 @@ const HelloWorld = () => {
   const [saleButton, setSaleButton] = useState(true)
 
   const createTicketPressed = async () => {
+    setStatus("");
     const { nomeEvento, valorIngresso, limit, quantidadeIngressos } = valores;
     console.log("input de createTicketPressed:", valores);
 
@@ -161,9 +183,24 @@ const HelloWorld = () => {
       return;
     }
 
-    const { status } = await loadCreateTicket(walletAddress, valores);
-    setStatus(status);
+    const txn = await loadCreateTicket(walletAddress, valores);
+    console.log("txn", txn);
+    setTituloModalTransacao("Status Criação Ingresso");
+    setOpenModalTransacao(true);
+    setMsgModalTransacao("Transação enviada. Aguardando confirmação...");
+    checkTransactionConfirmation(txn).then((res) => {
+      setMsgModalTransacao(res+" Os ingressos foram criados com sucesso!");
+    });
   };
+
+  const [openModalTransacao, setOpenModalTransacao] = useState(false);
+
+  const handleCloseModalTransacao = () => {
+    setOpenModalTransacao(false);
+  };
+
+  const [msgModalTransacao, setMsgModalTransacao] = useState("");
+  const [tituloModalTransacao, setTituloModalTransacao] = useState("");
 
   const listMyTicketsPressed = async () => {
     const myTicketsR = await loadFilterTicketsByOwner(0, walletAddress, transferibleButton, saleButton);
@@ -171,6 +208,7 @@ const HelloWorld = () => {
   };
 
   const buyTicketPressed = async () => {
+    setStatusBuyTicket("");
     const { idEvento, proprietario, valor } = inputComprarIngresso;
     console.log("input de buyTicketPressed:", inputComprarIngresso);
 
@@ -179,8 +217,14 @@ const HelloWorld = () => {
       return;
     }
 
-    const { status } = await loadBuyTicket(walletAddress, inputComprarIngresso, valor);
-    setStatusBuyTicket(status);
+    const txn = await loadBuyTicket(walletAddress, inputComprarIngresso, valor);
+    console.log("txn", txn);
+    setTituloModalTransacao("Status Comprar Ingresso");
+    setOpenModalTransacao(true);
+    setMsgModalTransacao("Transação enviada. Aguardando confirmação...");
+    checkTransactionConfirmation(txn).then((res) => {
+      setMsgModalTransacao(res+" Ingresso comprado com sucesso!");
+    });
   };
 
   const [inputComprarIngresso, setinputComprarIngresso] = useState({
@@ -227,10 +271,8 @@ const HelloWorld = () => {
       window.ethereum.on("accountsChanged", (accounts) => {
         if (accounts.length > 0) {
           setWallet(accounts[0]);
-          setStatus("👆🏽 Write a message in the text-field above.");
         } else {
           setWallet("");
-          setStatus("🦊 Connect to Metamask using the top right button.");
         }
       });
     } else {
@@ -311,7 +353,7 @@ const HelloWorld = () => {
                     name="valorIngresso"
                     value={valores.valorIngresso}
                     onChange={handleChange}
-                    label="Valor do ingresso"
+                    label="Valor do ingresso(ether)"
                     required
                   />
 
@@ -376,7 +418,7 @@ const HelloWorld = () => {
                       <TableCell align="center">ID do evento</TableCell>
                       <TableCell align="center">Nome do evento</TableCell>
                       <TableCell align="center">Organizador</TableCell>
-                      <TableCell align="center">Valor(wei)</TableCell>
+                      <TableCell align="center">Valor(ether)</TableCell>
                       <TableCell align="center">Disponiveis</TableCell>
                     </TableRow>
                   </TableHead>
@@ -467,7 +509,7 @@ const HelloWorld = () => {
                     name="valor"
                     value={inputComprarIngresso.valor}
                     onChange={handleComprarIngresso}
-                    label="Valor do ingresso"
+                    label="Valor do ingresso(ether)"
                     required
                   />
 
@@ -551,7 +593,7 @@ const HelloWorld = () => {
                       <TableCell align="center">ID do evento</TableCell>
                       <TableCell align="center">Nome do evento</TableCell>
                       <TableCell align="center">Organizador</TableCell>
-                      <TableCell align="center">Valor(wei)</TableCell>
+                      <TableCell align="center">Valor(ether)</TableCell>
                       <TableCell align="center">Tranferencias</TableCell>
                       <TableCell align="center">Limite</TableCell>
                       <TableCell align="center">Sale</TableCell>
@@ -663,6 +705,14 @@ const HelloWorld = () => {
           <p>{statusVerificar}</p>
           <Button onClick={handleVerificar}>Verificar</Button>
           <Button onClick={handleCloseModalVerificar}>Fechar</Button>
+        </Box>
+      </Modal>
+
+      <Modal open={openModalTransacao} onClose={handleCloseModalTransacao}>
+        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+          <h2>{tituloModalTransacao}</h2>
+          <p>{msgModalTransacao}</p>
+          <Button onClick={handleCloseModalTransacao}>Fechar</Button>
         </Box>
       </Modal>
 
