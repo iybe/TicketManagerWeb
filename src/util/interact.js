@@ -45,7 +45,7 @@ export const signTicket = async (ticketId, address) => {
         console.log("s", s);
         console.log("v", v);
 
-        return hashedMessage, r, s, v;
+        return { hashedMessage, r, s, v };
     } else {
         console.error('MetaMask não detectado');
     }
@@ -78,6 +78,15 @@ export const loadBuyTicket = async (address, data, value) => {
         value: value
     };
 
+    return await signMessage(transactionParameters);
+};
+
+export const loadVerifyTicket = async (ticketId, walletAddress, hashedMessage, r, s, v) => {
+    const transactionParameters = {
+        to: contractAddress,
+        from: walletAddress,
+        data: ticketContract.methods.verifyTicket(ticketId, hashedMessage, walletAddress, v, r, s).encodeABI()
+    };
     return await signMessage(transactionParameters);
 };
 

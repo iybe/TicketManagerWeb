@@ -8,7 +8,8 @@ import {
   getCurrentWalletConnected,
   loadFilterTicketsByOwner,
   loadGetInvalidateTicketsByOwner,
-  signTicket
+  signTicket,
+  loadVerifyTicket
 } from "./util/interact.js";
 import QrCode from 'react-qr-code';
 import { QrReader } from 'react-qr-reader';
@@ -78,7 +79,12 @@ const HelloWorld = () => {
 
 
   const handleOpenModalQrCode = (ticketId, walletAddress) => {
-    signTicket(ticketId, walletAddress).then((hashedMessage, r, s, v) => {
+    signTicket(ticketId, walletAddress).then((res) => {
+      const { hashedMessage, r, s, v } = res;
+      console.log("hashedMessage", hashedMessage);
+      console.log("r", r);
+      console.log("s", s);
+      console.log("v", v);
       setQrCodeContent(JSON.stringify({ ticketId, walletAddress, hashedMessage, r, s, v }));
       setOpenModalQrCode(true);
     }).catch((error) => {
@@ -104,7 +110,7 @@ const HelloWorld = () => {
   const handleScan = (data, error) => {
     console.log("data", data);
     if (!!data) {
-      setQrCodeReader(data?.text);
+      setQrCodeReader(JSON.parse(data?.text));
       setOpenModalQrReader(false);
       setOpenModalVerificar(true);
     }
@@ -117,6 +123,18 @@ const HelloWorld = () => {
 
   const handleCloseModalVerificar = () => {
     setOpenModalVerificar(false);
+  };
+
+  const [statusVerificar, setStatusVerificar] = useState("");
+
+  const handleVerificar = async () => {
+    setStatusVerificar("Verificando...");
+    const { ticketId, walletAddress, hashedMessage, r, s, v } = qrCodeReader;
+    const tickeIdNumber = parseInt(ticketId);
+    console.log("qrCodeReader", qrCodeReader);
+    console.log("tickeIdNumber", tickeIdNumber);
+    const { status } = await loadVerifyTicket(tickeIdNumber, walletAddress, hashedMessage, r, s, v);
+    setStatusVerificar(status);
   };
 
   const [showDisconnectButton, setShowDisconnectButton] = React.useState(false);
@@ -692,7 +710,8 @@ const HelloWorld = () => {
       <Modal open={openModalVerificar} onClose={handleCloseModalVerificar}>
         <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
           <h2>Verificar Ingresso</h2>
-          <p>{qrCodeReader}</p>
+          <p>{statusVerificar}</p>
+          <Button onClick={handleVerificar}>Verificar</Button>
           <Button onClick={handleCloseModalVerificar}>Fechar</Button>
         </Box>
       </Modal>
