@@ -140,6 +140,17 @@ const HelloWorld = () => {
     }
   };
 
+  const handleComprar = (eventId, owner, value) => {
+    setExpanded2(false);
+    setExpanded3(true);
+    setinputComprarIngresso({
+      idEvento: eventId,
+      proprietario: owner,
+      valor: value,
+      sale: false,
+    });
+  }
+
   const [openModalVerificar, setOpenModalVerificar] = useState(false);
 
   const handleCloseModalVerificar = () => {
@@ -420,6 +431,7 @@ const HelloWorld = () => {
                       <TableCell align="center">Organizador</TableCell>
                       <TableCell align="center">Valor(ether)</TableCell>
                       <TableCell align="center">Disponiveis</TableCell>
+                      <TableCell align="center">Comprar</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -458,6 +470,7 @@ const HelloWorld = () => {
                           </Button>
                         </TableCell>
                         <TableCell align="center">{row.quantity}</TableCell>
+                        <Button variant="contained" onClick={() => { handleComprar(row.eventId, row.organizer, row.value) }}>Comprar</Button>
                       </TableRow>
                     ))}
                   </TableBody>
