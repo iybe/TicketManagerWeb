@@ -324,22 +324,21 @@ const HelloWorld = () => {
     <div className="container">
       <Button variant="contained" onClick={connectWalletPressed}>
         {walletAddress.length > 0 ? (
-          "Connected: " +
           String(walletAddress).substring(0, 6) +
           "..." +
           String(walletAddress).substring(38)
         ) : (
-          <span>Connect Wallet</span>
+          <span>CONECTAR CARTEIRA</span>
         )}
       </Button>
       <Button variant="contained" onClick={disconnectWalletPressed} disable={showDisconnectButton}>
-        Disconnect Wallet
+        DESCONECTAR CARTEIRA
       </Button>
 
       <div className="cards">
         <Card>
           <div className="cardHeader">
-            <CardHeader sx={{ padding: "0px" }} title="Criar Ingresso" />
+            <CardHeader sx={{ padding: "0px" }} title="Criar Ingressos" />
             <CardActions disableSpacing>
               <ExpandMore
                 expand={expanded}
@@ -379,7 +378,7 @@ const HelloWorld = () => {
                     name="limit"
                     value={valores.limit}
                     onChange={handleChange}
-                    label="Limite de ingressos"
+                    label="Limite de Transferencias"
                     required
                   />
 
@@ -398,7 +397,7 @@ const HelloWorld = () => {
                   onClick={createTicketPressed}
                   sx={{ width: "100%", marginTop: "8px" }}
                 >
-                  Criar ingresso
+                  Criar ingressos
                 </Button>
 
                 <p id="status">{status}</p>
@@ -409,7 +408,7 @@ const HelloWorld = () => {
 
         <Card>
           <div className="cardHeader">
-            <CardHeader sx={{ padding: "0px" }} title="Listar Ingressos" />
+            <CardHeader sx={{ padding: "0px" }} title="Listar Eventos" />
             <CardActions disableSpacing>
               <ExpandMore
                 expand={expanded2}
@@ -635,7 +634,7 @@ const HelloWorld = () => {
                         <TableCell align="center">{row.age}</TableCell>
                         <TableCell align="center">{row.limit}</TableCell>
                         <TableCell align="center">{row.sale}</TableCell>
-                        <Button variant="contained" onClick={() => { handleOpenModalQrCode(row.id, walletAddress) }}>Abrir Modal</Button>
+                        <Button variant="contained" onClick={() => { handleOpenModalQrCode(row.id, walletAddress) }}>Abrir</Button>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -680,36 +679,19 @@ const HelloWorld = () => {
 
       <Modal open={openModalQrCode} onClose={handleCloseModalQrCode}>
         <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-          }}
+          className='boxModal'
+          sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}
         >
-          <Box
-            sx={{
-              width: 400,
-              bgcolor: 'background.paper',
-              border: '2px solid #000',
-              borderRadius: '8px',
-              p: 4,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            <QrCode value={qrCodeContent} size={300} />
+          <QrCode value={qrCodeContent} sx={{ width: 300 }} />
 
-            <Button onClick={handleCloseModalQrCode} sx={{ mt: 4 }}>
-              Fechar
-            </Button>
-          </Box>
+          <Button onClick={handleCloseModalQrCode} sx={{ mt: 4 }}>
+            Fechar
+          </Button>
         </Box>
       </Modal>
 
       <Modal open={openModalQrReader} onClose={handleCloseModalQrReader}>
-        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+        <Box className='boxModal' sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
           <h2>Leitor de QR Code</h2>
           <QrReader delay={300} onResult={handleScan} style={{ width: '100%' }} constraints={{
             facingMode: 'environment'
@@ -719,7 +701,7 @@ const HelloWorld = () => {
       </Modal>
 
       <Modal open={openModalVerificar} onClose={handleCloseModalVerificar}>
-        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+        <Box className='boxModal' sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
           <h2>Verificar Ingresso</h2>
           <p>{statusVerificar}</p>
           <Button onClick={handleVerificar}>Verificar</Button>
@@ -773,8 +755,8 @@ const HelloWorld = () => {
         /* Deixar o form com 1fr no celular */
         @media (max-width: 600px) {
           .boxModal {
-            width: 200px;
-            padding: 50px;
+            width: 250px;
+            padding: 15px;
           }
 
           .collapse {

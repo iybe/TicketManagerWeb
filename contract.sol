@@ -78,19 +78,6 @@ contract TicketContract {
         revert("Tickets not available");
     }
 
-    function changeSaleStatus(uint256 _id, bool _sale) public {
-        for (uint256 i = 0; i < tickets.length; i++) {
-            if (tickets[i].id == _id) {
-                if (tickets[i].owner != msg.sender) {
-                    revert("You are not the owner of this ticket.");
-                }
-                tickets[i].sale = _sale;
-                return;
-            }
-        }
-        revert("Tickets not found");
-    }
-
     function filterTicketsByOwner(uint256 _eventId, address _owner, bool transferable, bool _sale) public view returns (Ticket[] memory) {
         if (_owner == address(0)) {
             revert("Owner address is required.");
@@ -110,47 +97,6 @@ contract TicketContract {
             if (tickets[i].owner != _owner) {
                 continue;
             }
-            if (tickets[i].sale != _sale) {
-                continue;
-            }
-
-            if (transferable) {
-                if (tickets[i].age == tickets[i].limit) {
-                    continue;
-                }
-            }
-
-            filteredTickets[numberTickets] = tickets[i];
-            numberTickets++;
-        }
-
-        assembly {
-            mstore(filteredTickets, numberTickets)
-        }
-
-        return filteredTickets;
-    }
-
-    function filterTicketsByOrganizer(uint256 _eventId, address _organizer, bool transferable, bool _sale) public view returns (Ticket[] memory) {
-        if (_organizer == address(0)) {
-            revert("Organizer address is required.");
-        }
-        
-        Ticket[] memory filteredTickets = new Ticket[](tickets.length);
-        uint256 numberTickets = 0;
-
-        bool byEventId = _eventId != 0;
-
-        for (uint256 i = 0; i < tickets.length; i++) {
-            if (byEventId) {
-                if (tickets[i].eventId != _eventId) {
-                    continue;
-                }
-            }
-            if (tickets[i].organizer != _organizer) {
-                continue;
-            }
-
             if (tickets[i].sale != _sale) {
                 continue;
             }
@@ -202,83 +148,6 @@ contract TicketContract {
         }
 
         return groupTickets;
-    }
-
-    function filterTickets(uint256 _eventId, address _owner, address _organizer, uint256 _age, uint256 _limit) public view returns (Ticket[] memory) {
-        Ticket[] memory filteredTickets = new Ticket[](tickets.length);
-        uint256 numberTickets = 0;
-
-        bool byEventId = _eventId != 0;
-        bool byOwner = _owner != address(0);
-        bool byOrganizer = _organizer != address(0);
-        bool byAge = _age > 0;
-        bool byLimit = _limit > 0;
-
-        for (uint256 i = 0; i < tickets.length; i++) {
-            if (byEventId) {
-                if (tickets[i].eventId != _eventId) {
-                    continue;
-                }
-            }
-            if (byOwner) {
-                if (tickets[i].owner != _owner) {
-                    continue;
-                }
-            }
-            if (byOrganizer) {
-                if (tickets[i].organizer != _organizer) {
-                    continue;
-                }
-            }
-            if (byAge) {
-                if (tickets[i].age != _age) {
-                    continue;
-                }
-            }
-            if (byLimit) {
-                if (tickets[i].limit != _limit) {
-                    continue;
-                }
-            }
-
-            filteredTickets[numberTickets] = tickets[i];
-            numberTickets++;
-        }
-
-        assembly {
-            mstore(filteredTickets, numberTickets)
-        }
-
-        return filteredTickets;
-    }
-
-    function updateTicketValue(uint256 _id, uint256 _value) public returns (bool) {
-        if (_value < taxTransfer) {
-            revert("Value cannot be less than 10000 wei");
-        }
-        
-        for (uint256 i = 0; i < tickets.length; i++) {
-            if (tickets[i].id == _id) {
-                if (tickets[i].owner != msg.sender) {
-                    revert("You are not the owner of this ticket.");
-                }
-
-                tickets[i].value = _value;
-
-                return true;
-            }
-        }
-
-        revert("Ticket not found.");
-    }
-
-    function getTicketById(uint256 _id) public view returns (Ticket memory) {
-        for (uint256 i = 0; i < tickets.length; i++) {
-            if (tickets[i].id == _id) {
-                return tickets[i];
-            }
-        }
-        revert("not found");
     }
 
     function verifyTicket(uint256 _ticketId, bytes32 _hashedMessage, address _owner, uint8 _v, bytes32 _r, bytes32 _s) public {
